@@ -49,40 +49,7 @@ namespace Merge
                 StreamReader srData = new StreamReader(fileNameData, Encoding.Default);
                 StreamReader srTemplate = new StreamReader(fileNameTemplate, Encoding.Default);
 
-                // titleTerm for all terms' title
-                ArrayList titleTerm = new ArrayList();
-                string[] termOfData = srData.ReadLine().Split('\t');
-                ProcessDataTerm(titleTerm, termOfData);
-                int dataTermCount = titleTerm.Count;
-                // Read all data terms
-                ArrayList dataTerm = new ArrayList();                
-                while (!srData.EndOfStream)
-                {
-                    termOfData = srData.ReadLine().Split('\t');
-                    ProcessDataTerm(dataTerm, termOfData);
-                }
-                // Process template
-                string template = "";
-                if(!hasCommon) {
-                    template = ProcessTemplate(srTemplate, titleTerm);
-                    ResultOutput(template, dataTerm, dataTermCount, fileNameResult);
-                }
-                else
-                {
-                    if (File.Exists(fileNameCommon))
-                    {
-                        StreamReader srCommon = new StreamReader(fileNameCommon, Encoding.Default);
-                        ArrayList commonTerm = ProcessCommonTerm(titleTerm, srCommon);
-                        int commonTermCount = commonTerm.Count;
-                        template = ProcessTemplate(srTemplate, titleTerm);
-                        ResultOutput(template, dataTerm, commonTerm, dataTermCount, fileNameResult);
-                        srCommon.Close();
-                    }
-                    else
-                    {
-                        quitFlag = true;
-                    }                    
-                }
+                quitFlag = Merge(srTemplate, srData, fileNameResult, hasCommon, fileNameCommon);
                 srData.Close();
                 srTemplate.Close();
             }
@@ -91,6 +58,48 @@ namespace Merge
                 Console.WriteLine("Error occur...\nQuit...");
             }
             Console.ReadLine(); // As system("pause");
+        }
+
+        private static bool Merge(StreamReader srTemplate, StreamReader srData, string fileNameResult, bool hasCommon, string fileNameCommon)
+        {
+            bool quitFlag = false;
+
+            // titleTerm for all terms' title
+            ArrayList titleTerm = new ArrayList();
+            string[] termOfData = srData.ReadLine().Split('\t');
+            ProcessDataTerm(titleTerm, termOfData);
+            int dataTermCount = titleTerm.Count;
+            // Read all data terms
+            ArrayList dataTerm = new ArrayList();
+            while (!srData.EndOfStream)
+            {
+                termOfData = srData.ReadLine().Split('\t');
+                ProcessDataTerm(dataTerm, termOfData);
+            }
+            // Process template
+            string template = "";
+            if (!hasCommon)
+            {
+                template = ProcessTemplate(srTemplate, titleTerm);
+                ResultOutput(template, dataTerm, dataTermCount, fileNameResult);
+            }
+            else
+            {
+                if (File.Exists(fileNameCommon))
+                {
+                    StreamReader srCommon = new StreamReader(fileNameCommon, Encoding.Default);
+                    ArrayList commonTerm = ProcessCommonTerm(titleTerm, srCommon);
+                    int commonTermCount = commonTerm.Count;
+                    template = ProcessTemplate(srTemplate, titleTerm);
+                    ResultOutput(template, dataTerm, commonTerm, dataTermCount, fileNameResult);
+                    srCommon.Close();
+                }
+                else
+                {
+                    quitFlag = true;
+                }
+            }
+            return quitFlag;
         }
 
         // Useless in this project, left for string process reference.
